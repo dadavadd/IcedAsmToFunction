@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36105.17 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IcedAsmToFunction", "IcedAsmToFunction\IcedAsmToFunction.csproj", "{99B5DEB6-11A1-4716-86A3-7C9DA042522B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IcedAsmToFunction.Tests", "IcedAsmToFunction.Tests\IcedAsmToFunction.Tests.csproj", "{6E47DAEB-3CBA-4441-ADFA-97699D22D628}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99B5DEB6-11A1-4716-86A3-7C9DA042522B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99B5DEB6-11A1-4716-86A3-7C9DA042522B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99B5DEB6-11A1-4716-86A3-7C9DA042522B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99B5DEB6-11A1-4716-86A3-7C9DA042522B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E47DAEB-3CBA-4441-ADFA-97699D22D628}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E47DAEB-3CBA-4441-ADFA-97699D22D628}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E47DAEB-3CBA-4441-ADFA-97699D22D628}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E47DAEB-3CBA-4441-ADFA-97699D22D628}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {177681C7-22DC-47A9-8C9A-D6F3654259A5}
+	EndGlobalSection
+EndGlobal
