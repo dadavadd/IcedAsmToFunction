@@ -5,7 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>Preview</LangVersion>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks> 
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Title>Iced Assembler To Function</Title>
+	<PackageProjectUrl>https://github.com/dadavadd/IcedAsmToFunction</PackageProjectUrl> 
   </PropertyGroup>
 
   <ItemGroup>

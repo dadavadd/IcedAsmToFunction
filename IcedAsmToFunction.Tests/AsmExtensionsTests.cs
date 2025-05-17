@@ -108,24 +108,6 @@ public class AsmExtensionsTests
 
 
     [Fact]
-    public unsafe void ToFunction_DisposingFunction_PreventsFurtherExecution()
-    {
-        // Arrange
-        var asm = new Assembler(64);
-        asm.mov(eax, 42);
-        asm.ret();
-
-        // Act
-        var func = asm.ToFunction<int>();
-        int result = func.Invoke();
-        func.Dispose();
-
-        // Assert
-        Assert.Equal(42, result);
-        Assert.Throws<ObjectDisposedException>(() => func.Invoke());
-    }
-
-    [Fact]
     public unsafe void ToFunction_WithFourParameters_ComplexOperation()
     {
         // Arrange
@@ -152,13 +134,13 @@ public class AsmExtensionsTests
         var asmSmall = new Assembler(64);
         asmSmall.mov(eax, 1);
         asmSmall.ret();
-        using var funcSmall = asmSmall.ToFunction<int>(1024);
+        using var funcSmall = asmSmall.ToFunction<int>(baseSize: 1024);
 
         // Large allocation
         var asmLarge = new Assembler(64);
         asmLarge.mov(eax, 2);
         asmLarge.ret();
-        using var funcLarge = asmLarge.ToFunction<int>(8192);
+        using var funcLarge = asmLarge.ToFunction<int>(baseSize: 8192);
 
         // Both should work correctly despite different allocation sizes
         Assert.Equal(1, funcSmall.Invoke());

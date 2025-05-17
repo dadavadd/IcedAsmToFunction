@@ -1,303 +1,480 @@
-﻿using System.Runtime.Versioning;
-
-using static Windows.Win32.System.Memory.VIRTUAL_FREE_TYPE;
-using static Windows.Win32.Windows;
+﻿using System.Runtime.InteropServices;
 
 namespace IcedAsmToFunction;
 
-public unsafe readonly struct AsmFunctionBase(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction : IDisposable
 {
-    public void* FunctionPointer => functionPtr;
-    public bool IsOwner => isOwner;
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public void Dispose()
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
     {
-        if (isOwner && functionPtr != null)
-        {
-            VirtualFree(functionPtr, 0, MEM_RELEASE);
-        }
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
     }
-}
-
-public unsafe readonly struct AsmFunction(void* functionPtr, bool isOwner = true) : IDisposable
-{
-    private readonly AsmFunctionBase _base = new(functionPtr, isOwner);
-
-    public delegate* unmanaged[Cdecl]<void> Function =>
+    public delegate* unmanaged[Cdecl]<void> AsCdecl =>
         (delegate* unmanaged[Cdecl]<void>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<void> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<void>)_base.FunctionPointer;
 
     public void Invoke()
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction));
-        Function();
+
+        switch (Convention)
+        {
+            case CallingConvention.Cdecl:
+                AsCdecl();
+                break;
+            case CallingConvention.StdCall:
+                AsStdcall();
+                break;
+            default:
+                throw new InvalidOperationException($"Unsupported calling convention: {Convention}");
+        }
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<void>(AsmFunction func) => func.Function;
 }
 
-public unsafe readonly struct AsmFunction<TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new AsmFunctionBase(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<TResult>)_base.FunctionPointer;
 
     public TResult Invoke()
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<TResult>));
-        return Function();
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(),
+            CallingConvention.StdCall => AsStdcall(),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<TResult>(AsmFunction<TResult> func) =>
-        func.Function;
 }
 
-public unsafe readonly struct AsmFunction<T1, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, TResult>));
-        return Function(arg1);
+
+        if (Convention == CallingConvention.Cdecl)
+        {
+            return AsCdecl(arg1);
+        }
+        else if (Convention == CallingConvention.StdCall)
+        {
+            return AsStdcall(arg1);
+        }
+        else
+        {
+            throw new InvalidOperationException($"Unsupported calling convention: {Convention}");
+        }
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, TResult>(AsmFunction<T1, TResult> func) =>
-        func.Function;
 }
 
-public unsafe readonly struct AsmFunction<T1, T2, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, TResult>));
-        return Function(arg1, arg2);
+
+        if (Convention == CallingConvention.Cdecl)
+        {
+            return AsCdecl(arg1, arg2);
+        }
+        else if (Convention == CallingConvention.StdCall)
+        {
+            return AsStdcall(arg1, arg2);
+        }
+        else
+        {
+            throw new InvalidOperationException($"Unsupported calling convention: {Convention}");
+        }
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, TResult>(AsmFunction<T1, T2, TResult> func) =>
-        func.Function;
 }
-
-
-public unsafe readonly struct AsmFunction<T1, T2, T3, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, T3, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, TResult>));
-        return Function(arg1, arg2, arg3);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, TResult>(AsmFunction<T1, T2, T3, TResult> func) =>
-        func.Function;
 }
 
-public unsafe readonly struct AsmFunction<T1, T2, T3, T4, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, T3, T4, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new AsmFunctionBase(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, T4, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, T4, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, T4, TResult>));
-        return Function(arg1, arg2, arg3, arg4);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3, arg4),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3, arg4),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult>(AsmFunction<T1, T2, T3, T4, TResult> func) =>
-        func.Function;
 }
 
-public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new AsmFunctionBase(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, T4, T5, TResult>));
-        return Function(arg1, arg2, arg3, arg4, arg5);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3, arg4, arg5),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3, arg4, arg5),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult>(AsmFunction<T1, T2, T3, T4, T5, TResult> func) =>
-        func.Function;
 }
 
-
-public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new AsmFunctionBase(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, T4, T5, T6, TResult>));
-        return Function(arg1, arg2, arg3, arg4, arg5, arg6);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3, arg4, arg5, arg6),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3, arg4, arg5, arg6),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult>(AsmFunction<T1, T2, T3, T4, T5, T6, TResult> func) =>
-        func.Function;
 }
 
-public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new AsmFunctionBase(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, T4, T5, T6, T7, TResult>));
-        return Function(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3, arg4, arg5, arg6, arg7),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3, arg4, arg5, arg6, arg7),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult>(AsmFunction<T1, T2, T3, T4, T5, T6, T7, TResult> func) =>
-        func.Function;
 }
 
-public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult>));
-        return Function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult> func) =>
-        func.Function;
 }
 
-public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new AsmFunctionBase(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>));
-        return Function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(
-        AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> func) => func.Function;
 }
 
-public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new AsmFunctionBase(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>));
-        return Function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(
-        AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> func) => func.Function;
 }
 
-public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(void* functionPtr, bool isOwner = true) : IDisposable
+public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> : IDisposable
 {
-    private readonly AsmFunctionBase _base = new AsmFunctionBase(functionPtr, isOwner);
+    private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> Function =>
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
+
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>));
-        return Function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(
-        AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> func) => func.Function;
 }
 
 public unsafe readonly struct AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> : IDisposable
 {
     private readonly AsmFunctionBase _base;
+    public readonly CallingConvention Convention;
 
-    public AsmFunction(void* functionPtr, bool isOwner = true) => _base = new AsmFunctionBase(functionPtr, isOwner);
+    public AsmFunction(void* functionPtr, CallingConvention convention, bool isOwner = true)
+    {
+        _base = new AsmFunctionBase(functionPtr, isOwner);
+        Convention = convention;
+    }
 
-    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> Function =>
+    public delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> AsCdecl =>
         (delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>)_base.FunctionPointer;
+
+    public delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> AsStdcall =>
+        (delegate* unmanaged[Stdcall]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>)_base.FunctionPointer;
 
     public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12)
     {
         if (_base.FunctionPointer == null)
             throw new ObjectDisposedException(nameof(AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>));
-        return Function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+
+        return Convention switch
+        {
+            CallingConvention.Cdecl => AsCdecl(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12),
+            CallingConvention.StdCall => AsStdcall(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12),
+            _ => throw new InvalidOperationException($"Unsupported calling convention: {Convention}")
+        };
     }
 
     public void Dispose() => _base.Dispose();
-
-    public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(
-        AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> func) => func.Function;
 }

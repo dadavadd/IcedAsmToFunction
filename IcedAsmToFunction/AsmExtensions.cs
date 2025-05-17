@@ -16,48 +16,47 @@ public static unsafe class AsmExtensions
 {
     extension(Assembler asm)
     {
-        public AsmFunction ToFunction(int baseSize = 4096) 
-            => new(AllocateExecutableMemory(asm, baseSize));
-        
+        public AsmFunction ToFunction(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T> ToFunction<T>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<TResult> ToFunction<TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, TResult> ToFunction<T1, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, TResult> ToFunction<T1, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, TResult> ToFunction<T1, T2, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, TResult> ToFunction<T1, T2, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, TResult> ToFunction<T1, T2, T3, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, TResult> ToFunction<T1, T2, T3, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, T4, TResult> ToFunction<T1, T2, T3, T4, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, T4, TResult> ToFunction<T1, T2, T3, T4, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, T4, T5, TResult> ToFunction<T1, T2, T3, T4, T5, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, T4, T5, TResult> ToFunction<T1, T2, T3, T4, T5, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, T4, T5, T6, TResult> ToFunction<T1, T2, T3, T4, T5, T6, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, T4, T5, T6, TResult> ToFunction<T1, T2, T3, T4, T5, T6, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
 
-        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(int baseSize = 4096)
-            => new(AllocateExecutableMemory(asm, baseSize));
+        public AsmFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> ToFunction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(CallingConvention convention = CallingConvention.Cdecl, int baseSize = 4096)
+            => new(AllocateExecutableMemory(asm, baseSize), convention);
     }
 
     private static void* AllocateExecutableMemory(Assembler asm, int baseSize = 4096)
